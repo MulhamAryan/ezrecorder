@@ -1491,4 +1491,3 @@ class UserExtendedInfo
         return new UserExtendedInfo($full_name, $email);
     }
 }
-
