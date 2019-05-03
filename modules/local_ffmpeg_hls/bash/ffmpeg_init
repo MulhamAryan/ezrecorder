@@ -62,6 +62,16 @@ then
     source $STREAMING_INFO
 fi
 
+if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]
+then
+    LIBRARY="video4linux2 -thread_queue_size 5120"
+    AV_INPUT="/dev/video0"
+    FORMATS=" -f alsa -ac 1 -thread_queue_size 5120 -i $ALSA_INPUT"
+else
+    LIBRARY="avfoundation"
+    AV_INPUT=${AVFOUNDATION_VIDEO_INTERFACE}:${AVFOUNDATION_AUDIO_INTERFACE}
+fi
+
 # loop while delay hasn't expired and cam file doesn't exist
 while [ $CALLS -le $MAXCALLS -a \( $EXISTS_VIDEO -eq 0 \) ]
 do
@@ -101,7 +111,6 @@ do
             fi
         ;;
         "AV.io" )
-            AV_INPUT=${AVFOUNDATION_VIDEO_INTERFACE}:${AVFOUNDATION_AUDIO_INTERFACE}
             if [ -e $STREAMING_INFO ]
             then
                 # streaming is enabled. We prepare low and high resolution
