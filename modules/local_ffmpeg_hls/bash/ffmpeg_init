@@ -64,7 +64,7 @@ fi
 
 if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]
 then
-    LIBRARY="video4linux2 -thread_queue_size 5120 -f alsa -ac 1 -thread_queue_size 5120 -i 'ALSA Device'"
+    LIBRARY="video4linux2 -thread_queue_size 5120 -f alsa -ac 1 -thread_queue_size 5120 -i default"
     AV_INPUT="/dev/video0"
     FORMATS=""
 else
