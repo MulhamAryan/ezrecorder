@@ -64,9 +64,9 @@ fi
 
 if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]
 then
-    LIBRARY="video4linux2 -thread_queue_size 5120 -f alsa -ac 1 -thread_queue_size 5120 -i default"
+    LIBRARY="video4linux2 -thread_queue_size 2048 -f alsa -ac 1 -thread_queue_size 2048 -i default"
     AV_INPUT="/dev/video0"
-    FORMATS=""
+    AUDIO=""
 else
     LIBRARY="avfoundation"
     AV_INPUT=${AVFOUNDATION_VIDEO_INTERFACE}:${AVFOUNDATION_AUDIO_INTERFACE}
@@ -138,7 +138,7 @@ do
             fi
 
             if [ -e $STREAMING_INFO ]
-            then 
+            then
                 # streaming is enabled. If a low media is defined, copy it from camera stream, else re encode it ourselves
                 if [ -z $FFMPEG_RTSP_MEDIA_LOW_URI ]
                 then
@@ -165,7 +165,7 @@ do
                     -vf scale=235:157,fps=1 -y -update 1 $THUMBNAIL_PATH \
                     >/dev/null 2> $TARGET_DIR/ffmpeg_low.log & echo $! > $FFMPEG_PID2
                 fi
-            else 
+            else
                 # streaming is disabled. We prepare high resolution only
                 $FFMPEG_PATH -f rtsp -rtsp_transport $RTSP_TRANSPORT -thread_queue_size 127 \
                 -i $FFMPEG_RTSP_MEDIA_HIGH_URI -vcodec copy -acodec aac $AC -hls_time 3 \
@@ -173,12 +173,12 @@ do
                 $HIGH_DIR/$COMMON_MOVIE_NAME.m3u8 -vf scale=235:157,fps=1 \
                 -y -update 1 $THUMBNAIL_PATH \
                 >/dev/null 2> $TARGET_DIR/ffmpeg.log & echo $! > $FFMPEG_PID
-            fi 
+            fi
         ;;
         *)
             #no valid input source specified
             exit 1
-            ;; 
+            ;;
 
             # -f decklink = force BMD source
             # -i = input source
@@ -204,28 +204,28 @@ do
 
     # loop while delay hasn't expired and cam file doesn't exist
     while [ $(( `date +"%s"`- $SDAT )) -le $WAITING_DELAY -a \( $EXISTS_VIDEO -eq 0 \) ]
-    do 
+    do
         # if video didn't exist yet, checks if it exists now
         [ $EXISTS_VIDEO -eq 0 ] && test -e $HIGH_DIR/${COMMON_MOVIE_NAME}1.ts && EXISTS_VIDEO=1;
-        
+
         if [ -e $STREAMING_INFO ] && [ $EXISTS_VIDEO -eq 1 ]
-        then 
+        then
             EXISTS_VIDEO=0;
             [ $EXISTS_VIDEO -eq 0 ] && test -e $LOW_DIR/${COMMON_MOVIE_NAME}1.ts && EXISTS_VIDEO=1;
         fi
-        
-        # if    if [ $EXISTS_VIDEO -eq 0 ]cam doesn't exist yet, wait 
+
+        # if    if [ $EXISTS_VIDEO -eq 0 ]cam doesn't exist yet, wait
         if [ $EXISTS_VIDEO -eq 0 ]
         then
             sleep 1
         else
           #first .ts file found. Lets see if we don't see those lethal DTS errors is logfile
           grep 'non monotonous DTS' $HIGH_DIR/../ffmpeg.log
-          if [ $? -eq 0 ] 
+          if [ $? -eq 0 ]
           then
             # we have a DTS problem, so we need to restart ffmpeg
             EXISTS_VIDEO=0
-            kill -HUP $FFMPEG_PID 
+            kill -HUP $FFMPEG_PID
             rm $TARGET_DIR/ffmpeg.log
             rm  $HIGH_DIR/*.m3u8
             rm  $HIGH_DIR/*.ts
@@ -235,15 +235,15 @@ do
         fi
     done
 
-    # add entry in log file 
+    # add entry in log file
     [ $CALLS -eq 1 ] && echo "********************************************" >> $TARGET_DIR/_check_log
     [ $CALLS -gt 1 ] && echo "--------------------------------------------" >> $TARGET_DIR/_check_log
     echo `date +"%d/%m/%y - %Hh%Mm%Ss"` : Attempt $CALLS >> $TARGET_DIR/_check_log
     echo "--------------------------------------------" >> $TARGET_DIR/_check_log
-    if [ $EXISTS_VIDEO -eq 1 ]; then 
-        echo "CAM (EZrecorder)   : Success" >> $TARGET_DIR/_check_log; 
-    else 
-        echo "CAM (EZrecorder)   : Failure" >> $TARGET_DIR/_check_log; 
+    if [ $EXISTS_VIDEO -eq 1 ]; then
+        echo "CAM (EZrecorder)   : Success" >> $TARGET_DIR/_check_log;
+    else
+        echo "CAM (EZrecorder)   : Failure" >> $TARGET_DIR/_check_log;
         kill -9 `cat $FFMPEG_PID`
         kill -9 `cat $FFMPEG_PID2`
         rm $LOW_DIR/${COMMON_MOVIE_NAME}*.ts
