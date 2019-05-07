@@ -39,6 +39,16 @@ then
     PRESET_STR="-preset ${H264_PRESET}"
 fi
 
+if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]
+then
+    LIBRARY="video4linux2 -thread_queue_size 512 -f alsa -ac 1 -thread_queue_size 512 -i default"
+    AV_INPUT="/dev/video0"
+    FORMATS=""
+else
+    LIBRARY="avfoundation"
+    AV_INPUT=${AVFOUNDATION_VIDEO_INTERFACE}:${AVFOUNDATION_AUDIO_INTERFACE}
+fi
+
 case "$INPUT" in
     "DeckLink" )
         DECKLINK_INPUT="${DECKLINK_DEVICE}@${DECKLINK_FORMAT_INDEX}"
@@ -75,9 +85,9 @@ case "$INPUT" in
             -update 1 $THUMBNAIL_PATH </dev/null >/dev/null 2> $TARGET_DIR/ffmpeg_${CALLS}.log & echo $! > $FFMPEG_PID
         else 
             # streaming is disabled. We prepare high resolution only
-            $FFMPEG_PATH -f avfoundation -pixel_format yuyv422 -s 1280x720 -framerate 15 \
-            -i "$AV_INPUT" -vcodec libx264 $PRESET_STR $PROFILE_STR -acodec aac $AC \
-            -pix_fmt yuv420p -force_key_frames "expr:gte(t,n_forced*3)" -flags -global_header \
+            $FFMPEG_PATH -t $LIMIT_DURATION -f avfoundation -vcodec rawvideo -pixel_format yuyv422 -r '25' \
+            -i "$AV_INPUT" -vcodec libx264 -r 25 -crf 18 $PRESET_STR $PROFILE_STR -acodec aac $AC -maxrate 1000k \
+            -bufsize 1835k -pix_fmt yuv420p -force_key_frames "expr:gte(t,n_forced*3)" -flags -global_header \
             -hls_time 3 -hls_list_size 0 -hls_wrap 0 -start_number 1 $HIGH_DIR/$COMMON_MOVIE_NAME.m3u8 -vf fps=1 -y \
             -update 1 $THUMBNAIL_PATH </dev/null >/dev/null 2> $TARGET_DIR/ffmpeg_${CALLS}.log & echo $! > $FFMPEG_PID
         fi ;;               
