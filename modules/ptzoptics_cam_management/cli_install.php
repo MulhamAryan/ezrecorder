@@ -14,7 +14,8 @@ echo PHP_EOL . "Creating config.inc" . PHP_EOL;
 echo "Please, enter now the requested values :" . PHP_EOL;
 $value = read_line("Static IP address for PTZOptics Camera [default: '$cam_ip']: ");
 if ($value != "")
-    $onvifcam_ip = $value; 
+    $cam_ip = $value; 
+
 unset($value);
 
 $config = file_get_contents("$modules_basedir/ptzoptics_cam_management/config_sample.inc");
