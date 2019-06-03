@@ -1,13 +1,11 @@
 <?php
+require(__DIR__ . '/lib_cam.php');
 
 if($argc != 2) {
-	echo "Usage: removepreset.php <preset_name>" . PHP_EOL;
+	echo "Usage: cli_preset_remove.php <preset_info>" . PHP_EOL;
 	die();
 }
 
-$presetName = $argv[1];
+$presetInfo = $argv[1];
 
-require(__DIR__ . '/lib_cam.php');
-
-Logger::$print_logs = true;
-cam_ptzoptics_pos_delete($presetName);
+cam_lumens_pos_delete($presetInfo);

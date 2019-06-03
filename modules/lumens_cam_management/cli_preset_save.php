@@ -1,14 +1,12 @@
 <?php
 
+require(__DIR__ . '/lib_cam.php');
 
-if($argc != 2) {
-	echo "Usage: savepreset.php <preset_name>" . PHP_EOL;
+if($argc != 3) {
+	echo "Usage: cli_preset_save.php <preset_info> <preset_name>" . PHP_EOL;
 	die();
 }
 
-$presetName = $argv[1];
-
-require(__DIR__ . '/lib_cam.php');
-
-//Logger::$print_logs = true;
-cam_ptzoptics_pos_save($presetName);
+$presetInfo = $argv[1];
+$presetName = $argv[2];
+cam_lumens_set_presets($presetInfo,$presetName);
