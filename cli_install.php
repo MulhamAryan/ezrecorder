@@ -3,18 +3,17 @@
 /*
  * This file is part of the installation process. The first part is the install.sh file.
  */
-
+/*
 if ($argc < 3) {
     echo "usage: " . $argv[0] . " <php_path> <ffmpeg_path>" .
     "\n <php_path> the path to the php binary";
     "\n <ffmpeg_path> the path to the ffmpeg binary";
     die;
 }
-
+*/
 require_once(__DIR__."/lib_install.php");
 
 $in_install = true; //check usage in global_config.inc, this allow including the global_config_sample without failing
-
 echo "Is this recorder a [M]aster or a [R]emote recorder?" . PHP_EOL;
 echo "The master controls the recording and serve the web interface, while the slave is used only as an second video source." . PHP_EOL;
 $choice = "";
@@ -106,7 +105,6 @@ if ($create_global_config) {
 /*
  * Then, we adapt some paths in configuration files
  */
-
 echo "Modification of global values in ./sbin/localdefs" . PHP_EOL;
 
 $sbin_file = file_get_contents($basedir . "/sbin/localdefs_sample");
@@ -173,14 +171,15 @@ echo PHP_EOL;
 require_once("lib_template.php");
 echo "Templates for all languages will be generated in folder 'tmpl'" . PHP_EOL;
 
-$res = template_generate("tmpl_sources/", "fr", "tmpl", $error);
-if(!$res) {
-    echo $error . PHP_EOL;
+$languages = array('fr','en');
+
+foreach($languages as $lang){
+    $res = template_generate("tmpl_sources/", $lang, "tmpl", $error);
+    if(!$res) {
+        echo $error . PHP_EOL;
+    }
 }
-$res = template_generate("tmpl_sources/", "en", "tmpl", $error);
-if(!$res) {
-    echo $error . PHP_EOL;
-}
+
 echo "Templates generation done" . PHP_EOL;
 
 //Try to connect on port 80. return 0 on failure, 1 on success
