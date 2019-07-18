@@ -178,7 +178,6 @@ function template_parse($file, $lang, $output_folder) {
     //look for ®string® where string in any (smallest, ungreedy) suite of nonspace chars.
     //Begin and end of @string@ must be on the same line.
     //calls template_get_label for each match and replace keywork with translated value in the text
-    //$data = preg_replace_callback('!®(\S+)®!iU', create_function('$matches', 'return template_get_label($matches[1], \''.$lang.'\');'), $data);
     $data = preg_replace_callback('!®(\S+)®!iU',
         function ($matches){
             global $lang;

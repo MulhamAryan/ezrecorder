@@ -27,3 +27,4 @@ localdefs
 /tmpl/
 **/tmpl
 **/**/Thumbs.db
+.idea/**
